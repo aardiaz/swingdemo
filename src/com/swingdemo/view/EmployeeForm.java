@@ -82,6 +82,7 @@ public class EmployeeForm extends JFrame {
 					emp.setFname(fnameTxt.getText());
 					
 					if(maleRbt.isSelected()) {
+						
 						emp.setGender("male");
 						
 					}else {
@@ -92,6 +93,7 @@ public class EmployeeForm extends JFrame {
 					EmployeeService  es = new EmployeeServiceImpl();
 					
 					if(es.addEmp(emp)) {
+						
 						JOptionPane.showMessageDialog(null, "added success");
 					}else {
 						JOptionPane.showMessageDialog(null, "failed");
