@@ -26,14 +26,10 @@ import com.swingdemo.model.Employee;
 import com.swingdemo.service.EmployeeService;
 import com.swingdemo.service.EmployeeServiceImpl;
 import com.toedter.calendar.JDateChooser;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
-public class EmployeeForm extends JFrame {
+public class EditForm extends JFrame {
 
 	private JPanel contentPane;
-	private JScrollPane scrollPane;
-	private JTable table;
 	private JLabel firstNameLabel;
 	private JLabel lastNameLabel;
 	private JLabel ageLabel;
@@ -61,8 +57,6 @@ public class EmployeeForm extends JFrame {
 	private JTextField salaryTextField;
 	private JButton saveButton;
 	private JButton editButton;
-	private JButton deleteButton;
-	private JButton clearButton;
 	private JRadioButton maleRadioButton;
 	private JRadioButton femaleRadioButton;
 	private JRadioButton otherRadioButton;
@@ -70,10 +64,8 @@ public class EmployeeForm extends JFrame {
 	private JDateChooser dobDateChooser;
 	private JDateChooser joinedAtDateChooser;
 
-	private Employee employee = new Employee();
+	int eid = 0;
 	private EmployeeService employeeService = new EmployeeServiceImpl();
-	private JTextField searchTxt;
-	private JLabel lblSearch;
 	/**
 	 * Launch the application.
 	 */
@@ -81,7 +73,7 @@ public class EmployeeForm extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					EmployeeForm frame = new EmployeeForm();
+					EditForm frame = new EditForm();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -93,14 +85,14 @@ public class EmployeeForm extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public EmployeeForm() {
+	public EditForm() {
+		setTitle("Edit Form");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1140, 579);
+		setBounds(100, 100, 618, 579);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		contentPane.add(getScrollPane());
 		contentPane.add(getFirstNameLabel());
 		contentPane.add(getLastNameLabel());
 		contentPane.add(getAgeLabel());
@@ -128,37 +120,11 @@ public class EmployeeForm extends JFrame {
 		contentPane.add(getSalaryTextField());
 		contentPane.add(getSaveButton());
 		contentPane.add(getEditButton());
-		contentPane.add(getDeleteButton());
-		contentPane.add(getClearButton());
 		contentPane.add(getMaleRadioButton());
 		contentPane.add(getFemaleRadioButton());
 		contentPane.add(getOtherRadioButton());
 		contentPane.add(getDobDateChooser());
 		contentPane.add(getJoinedAtDateChooser());
-		contentPane.add(getSearchTxt());
-		contentPane.add(getLblSearch());
-		display();
-	}
-	private JScrollPane getScrollPane() {
-		if (scrollPane == null) {
-			scrollPane = new JScrollPane();
-			scrollPane.setBounds(494, 68, 620, 412);
-			scrollPane.setViewportView(getTable());
-		}
-		return scrollPane;
-	}
-	private JTable getTable() {
-		if (table == null) {
-			table = new JTable();
-			table.setModel(new DefaultTableModel(
-				new Object[][] {
-				},
-				new String[] {
-					"Id","Name", "Phone Number", "Company"
-				}
-			));
-		}
-		return table;
 	}
 	private JLabel getFirstNameLabel() {
 		if (firstNameLabel == null) {
@@ -362,12 +328,14 @@ public class EmployeeForm extends JFrame {
 	}
 	private JButton getSaveButton() {
 		if (saveButton == null) {
-			saveButton = new JButton("Save");
+			saveButton = new JButton("Update");
 			saveButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					
-					validateInputs();
 					
+					Employee employee = new Employee();
+					
+					employee.setId(eid);
 					employee.setFname(firstNameTextField.getText());
 					employee.setLname(lastNameTextField.getText());
 					int age;
@@ -388,45 +356,15 @@ public class EmployeeForm extends JFrame {
 					employee.setDob(new Date(dobDateChooser.getDate().getTime()));
 					employee.setJoiningDate(new Date(joinedAtDateChooser.getDate().getTime()));
 					
-					if(employeeService.addEmp(employee)) {
-						JOptionPane.showMessageDialog(contentPane, "Database insert successfully!");
-						display();
+					if(employeeService.updateEmp(employee)) {
+						JOptionPane.showMessageDialog(contentPane, "Database udate successfully!");
+						new EmployeeForm().setVisible(true);
+						dispose();
 						
 					}else {
-						JOptionPane.showMessageDialog(contentPane, "Databse insert failure!");
+						JOptionPane.showMessageDialog(contentPane, "Databse update failure!");
 					}
 					
-				
-					
-					// Insert data into table 
-					
-					/*
-					 * String selectQuery =
-					 * "select * from employee where first_name = '"+firstName+"'"; ResultSet rs =
-					 * null; try { stmt = conn.createStatement(); rs =
-					 * stmt.executeQuery(selectQuery); } catch (SQLException e1) {
-					 * e1.printStackTrace(); }
-					 * 
-					 * try { while(rs.next()) { String nameForTable = rs.getString("first_name") +
-					 * rs.getString("last_name"); String emailForTable = rs.getString("email");
-					 * String phoneNumberTable = rs.getString("phone_number"); String countryTable =
-					 * rs.getString("country"); String position = rs.getString("post");
-					 * 
-					 * DefaultTableModel model = (DefaultTableModel) table.getModel();
-					 * 
-					 * model.addRow(new Object[] {nameForTable, emailForTable, phoneNumberTable,
-					 * countryTable, position}); }
-					 * 
-					 * 
-					 * } catch (SQLException e1) { e1.printStackTrace(); }
-					 */
-					
-					
-					
-					
-					clearFields();
-					
-					System.out.println("how is the connection ");
 				}
 			});
 			saveButton.setBackground(new Color(0, 153, 0));
@@ -437,70 +375,16 @@ public class EmployeeForm extends JFrame {
 	}
 	private JButton getEditButton() {
 		if (editButton == null) {
-			editButton = new JButton("Edit");
-			editButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					
-					if(table.getSelectedRow() < 0) {
-						JOptionPane.showMessageDialog(null, "plz. select any row ..");
-						return;
-					}
-					
-					int row = table.getSelectedRow();
-					int id = (int)table.getModel().getValueAt(row, 0);
-					
-					EditForm  ef = new EditForm();
-					ef.setData(id);
-					ef.setVisible(true);
-					dispose();
-					
-				}
-			});
-			editButton.setBounds(153, 483, 89, 23);
+			editButton = new JButton("Back");
+			editButton.setBounds(274, 483, 89, 23);
 		}
 		return editButton;
-	}
-	private JButton getDeleteButton() {
-		if (deleteButton == null) {
-			deleteButton = new JButton("Delete");
-			deleteButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					
-					if(table.getSelectedRow() < 0) {
-						JOptionPane.showMessageDialog(null, "plz. select any row ..");
-						return;
-					}
-					
-					int row = table.getSelectedRow();
-					int id = (int)table.getModel().getValueAt(row, 0);
-					
-						if(employeeService.deleteEmp(id)) {
-							JOptionPane.showMessageDialog(null, "deleted success");
-							display();
-						}else {
-							JOptionPane.showMessageDialog(null, "failed");
-						}
-						
-						
-					
-				}
-			});
-			deleteButton.setBounds(265, 484, 89, 23);
-		}
-		return deleteButton;
-	}
-	private JButton getClearButton() {
-		if (clearButton == null) {
-			clearButton = new JButton("Clear All");
-			clearButton.setBounds(422, 483, 89, 23);
-		}
-		return clearButton;
 	}
 	private JRadioButton getMaleRadioButton() {
 		if (maleRadioButton == null) {
 			maleRadioButton = new JRadioButton("Male");
 			buttonGroup.add(maleRadioButton);
-			maleRadioButton.setBounds(152, 99, 109, 23);
+			maleRadioButton.setBounds(152, 99, 53, 23);
 		}
 		return maleRadioButton;
 	}
@@ -508,7 +392,7 @@ public class EmployeeForm extends JFrame {
 		if (femaleRadioButton == null) {
 			femaleRadioButton = new JRadioButton("Female");
 			buttonGroup.add(femaleRadioButton);
-			femaleRadioButton.setBounds(281, 99, 109, 23);
+			femaleRadioButton.setBounds(224, 100, 75, 23);
 		}
 		return femaleRadioButton;
 	}
@@ -516,7 +400,7 @@ public class EmployeeForm extends JFrame {
 		if (otherRadioButton == null) {
 			otherRadioButton = new JRadioButton("Other");
 			buttonGroup.add(otherRadioButton);
-			otherRadioButton.setBounds(402, 99, 109, 23);
+			otherRadioButton.setBounds(300, 106, 109, 23);
 		}
 		return otherRadioButton;
 	}
@@ -571,62 +455,42 @@ public class EmployeeForm extends JFrame {
 	private JDateChooser getDobDateChooser() {
 		if (dobDateChooser == null) {
 			dobDateChooser = new JDateChooser();
-			dobDateChooser.setBounds(153, 399, 74, 20);
+			dobDateChooser.setBounds(153, 399, 127, 20);
 		}
 		return dobDateChooser;
 	}
 	private JDateChooser getJoinedAtDateChooser() {
 		if (joinedAtDateChooser == null) {
 			joinedAtDateChooser = new JDateChooser();
-			joinedAtDateChooser.setBounds(153, 429, 74, 20);
+			joinedAtDateChooser.setBounds(153, 429, 127, 20);
 		}
 		return joinedAtDateChooser;
 	}
+
+	public void setData(int id) {
+		
+		eid = id;
+		
+		Employee  emp = employeeService.getById(id);
+		
+		firstNameTextField.setText(emp.getFname());
+		lastNameTextField.setText(emp.getLname());
+		
+		if(emp.getGender().equalsIgnoreCase("male")) {
+			maleRadioButton.setSelected(true);
+		}else if(emp.getGender().equalsIgnoreCase("female")){
+			femaleRadioButton.setSelected(true);
+		}else {
+			otherRadioButton.setSelected(true);
+		}
+		
+		dobDateChooser.setDate(emp.getDob());
+		joinedAtDateChooser.setDate(emp.getJoiningDate());
+		
+		salaryTextField.setText(String.valueOf(emp.getSalary()));
+		ageTextField.setText(String.valueOf(emp.getAge()));
+		
+	}
 	
-	
-	//display employee data in jtable
-	private void display() {
-		
-		List<Employee>  elist = employeeService.getAllEmp();
-		
-		DefaultTableModel  model  = (DefaultTableModel) table.getModel();
-		model.setRowCount(0);
-		
-		for(Employee emp : elist) {
-			
-			model.addRow(new Object[] {emp.getId(), emp.getFname()+" "+emp.getLname(),emp.getPhone(),emp.getCompany()});
-		}
-	}
-	private JTextField getSearchTxt() {
-		if (searchTxt == null) {
-			searchTxt = new JTextField();
-			searchTxt.addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyReleased(KeyEvent arg0) {
-					
-					String input = searchTxt.getText().trim();
-					List<Employee> elist = employeeService.search(input);
-					
-					DefaultTableModel  model  = (DefaultTableModel) table.getModel();
-					model.setRowCount(0);
-					
-					for(Employee emp : elist) {
-						
-						model.addRow(new Object[] {emp.getId(), emp.getFname()+" "+emp.getLname(),emp.getPhone(),emp.getCompany()});
-					}
-					
-				}
-			});
-			searchTxt.setBounds(932, 37, 144, 20);
-			searchTxt.setColumns(10);
-		}
-		return searchTxt;
-	}
-	private JLabel getLblSearch() {
-		if (lblSearch == null) {
-			lblSearch = new JLabel("Search");
-			lblSearch.setBounds(856, 43, 46, 14);
-		}
-		return lblSearch;
-	}
+	 
 }

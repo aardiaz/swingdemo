@@ -10,7 +10,7 @@ public class DB {
 		try {
 
 			Class.forName("com.mysql.jdbc.Driver");
-			return DriverManager.getConnection("jdbc:mysql://localhost:3306/swingdb", "root", "1234");
+			return DriverManager.getConnection("jdbc:mysql://localhost:3306/swingdb3pm", "root", "1234");
 
 		} catch (Exception e) {
 			e.printStackTrace();
